@@ -21,25 +21,26 @@ fn parse_line(line: &str) -> Option<Command> {
 fn main() {
     let input = read_to_string("inputs/day02.txt").expect("file not found");
 
-    let result_1 = input
+    let commands = input
         .lines()
         .map(|l| parse_line(l).unwrap())
-        .fold((0, 0), |(hor, dep), c| match c {
-            Command::Forward(n) => (hor + n, dep),
-            Command::Down(n) => (hor, dep + n),
-            Command::Up(n) => (hor, dep - n),
-        });
+        .collect::<Vec<_>>();
+
+    let result_1 = commands.iter().fold((0, 0), |(hor, dep), c| match c {
+        Command::Forward(n) => (hor + n, dep),
+        Command::Down(n) => (hor, dep + n),
+        Command::Up(n) => (hor, dep - n),
+    });
 
     println!("Part 1: {}", result_1.0 * result_1.1);
 
-    let result_2 = input.lines().map(|l| parse_line(l).unwrap()).fold(
-        (0, 0, 0),
-        |(hor, dep, aim), c| match c {
+    let result_2 = commands
+        .iter()
+        .fold((0, 0, 0), |(hor, dep, aim), c| match c {
             Command::Forward(n) => (hor + n, dep + aim * n, aim),
             Command::Down(n) => (hor, dep, aim + n),
             Command::Up(n) => (hor, dep, aim - n),
-        },
-    );
+        });
 
     println!("Part 2: {}", result_2.0 * result_2.1);
 }
