@@ -51,33 +51,47 @@ fn main() {
     println!("Part 2: {}", basins[0] * basins[1] * basins[2]);
 }
 
-fn basin_size(vec: &[Vec<u32>], i: usize, j: usize) -> usize {
-    flood_fill(vec, i, j).len()
+struct FloodFill<'a> {
+    visited: HashSet<(usize, usize)>,
+    queue: VecDeque<(usize, usize)>,
+    grid: &'a [Vec<u32>],
 }
 
-fn flood_fill(vec: &[Vec<u32>], i: usize, j: usize) -> Vec<(usize, usize, u32)> {
+impl<'a> Iterator for FloodFill<'a> {
+    type Item = (usize, usize, u32);
+
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        if let Some(c) = self.queue.pop_front() {
+            for (i, j, v) in neighbours(self.grid, c.0, c.1) {
+                if !self.visited.contains(&(i, j)) && v != 9 {
+                    self.visited.insert((i, j));
+                    self.queue.push_back((i, j));
+                }
+            }
+
+            Some((c.0, c.1, self.grid[c.0][c.1]))
+        } else {
+            None
+        }
+    }
+}
+
+fn flood_fill_iter<'a>(grid: &'a [Vec<u32>], i: usize, j: usize) -> FloodFill<'a> {
     let mut visited: HashSet<(usize, usize)> = HashSet::new();
-    let mut result: HashSet<(usize, usize, u32)> = HashSet::new();
     let mut queue: VecDeque<(usize, usize)> = VecDeque::new();
 
     queue.push_back((i, j));
+    visited.insert((i, j));
 
-    while let Some(c) = queue.pop_front() {
-        visited.insert(c);
-        result.insert((c.0, c.1, vec[c.0][c.1]));
-
-        let ns = neighbours(vec, c.0, c.1);
-        for n in ns {
-            if !visited.contains(&(n.0, n.1)) && n.2 != 9 {
-                queue.push_back((n.0, n.1));
-            }
-        }
+    FloodFill {
+        grid,
+        queue,
+        visited,
     }
+}
 
-    let mut result: Vec<(usize, usize, u32)> = result.into_iter().collect();
-    result.sort();
-
-    result
+fn basin_size(vec: &[Vec<u32>], i: usize, j: usize) -> usize {
+    flood_fill_iter(vec, i, j).count()
 }
 
 fn neighbours(vec: &[Vec<u32>], i: usize, j: usize) -> Vec<(usize, usize, u32)> {
