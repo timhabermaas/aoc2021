@@ -94,9 +94,5 @@ fn neighbours(i: usize, j: usize, height: usize, width: usize) -> Vec<(usize, us
 }
 
 fn add_one(x: usize, max: usize) -> Option<usize> {
-    if x < max - 1 {
-        Some(x + 1)
-    } else {
-        None
-    }
+    (x < max - 1).then(|| x + 1)
 }
