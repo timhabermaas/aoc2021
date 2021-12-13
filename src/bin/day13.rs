@@ -62,23 +62,20 @@ fn main() {
             .copied()
             .collect::<HashSet<_>>();
 
-        print(&dots);
+        print_paper(&dots);
         println!("{}", dots.len());
     }
 }
 
-fn print(set: &HashSet<(u32, u32)>) {
+fn print_paper(set: &HashSet<(u32, u32)>) {
     let max_y = *set.iter().map(|(_x, y)| y).max().unwrap();
     let max_x = *set.iter().map(|(x, _y)| x).max().unwrap();
 
-    for y in 0..=max_y {
-        for x in 0..=max_x {
-            if set.contains(&(x, y)) {
-                print!("#");
-            } else {
-                print!(".");
-            }
-        }
-        println!("");
-    }
+    (0..=max_y).for_each(|y| {
+        let line: String = (0..=max_x)
+            .map(|x| if set.contains(&(x, y)) { '#' } else { '.' })
+            .collect();
+
+        println!("{}", line);
+    })
 }
