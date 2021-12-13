@@ -1,9 +1,7 @@
 use std::collections::HashSet;
 use std::fs::read_to_string;
 
-fn main() {
-    let input = read_to_string("inputs/day13.txt").expect("file not found");
-
+fn parse(input: &str) -> (Vec<(u32, u32)>, Vec<(&str, u32)>) {
     let mut coordinates = vec![];
     let mut folds = vec![];
 
@@ -29,6 +27,14 @@ fn main() {
             ));
         }
     }
+
+    (coordinates, folds)
+}
+
+fn main() {
+    let input = read_to_string("inputs/day13.txt").expect("file not found");
+
+    let (coordinates, folds) = parse(&input);
 
     let mut dots = coordinates.iter().copied().collect::<HashSet<_>>();
 
