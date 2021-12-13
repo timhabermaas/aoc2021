@@ -1,34 +1,33 @@
+use itertools::Itertools;
 use std::collections::HashSet;
 use std::fs::read_to_string;
 
 fn parse(input: &str) -> (Vec<(u32, u32)>, Vec<(&str, u32)>) {
-    let mut coordinates = vec![];
-    let mut folds = vec![];
+    let (coordinates, folds) = input.split("\n\n").collect_tuple().unwrap();
 
-    for l in input.lines() {
-        if l == "" {
-            continue;
-        }
-        if l.starts_with("fold") {
-            let mut parts = l.split_whitespace();
-            parts.next();
-            parts.next();
-            let c = parts.next().unwrap();
-            let mut parts = c.split("=");
-            folds.push((
-                parts.next().unwrap(),
-                parts.next().unwrap().parse::<u32>().unwrap(),
-            ));
-        } else {
-            let mut parts = l.split(",");
-            coordinates.push((
-                parts.next().unwrap().parse::<u32>().unwrap(),
-                parts.next().unwrap().parse::<u32>().unwrap(),
-            ));
-        }
-    }
+    (
+        coordinates
+            .lines()
+            .map(|l| {
+                let (x, y) = l.split(",").collect_tuple().unwrap();
+                (x.parse().unwrap(), y.parse().unwrap())
+            })
+            .collect(),
+        folds
+            .lines()
+            .map(|l| {
+                let (dir, value) = l
+                    .split_whitespace()
+                    .nth(2)
+                    .unwrap()
+                    .split("=")
+                    .collect_tuple()
+                    .unwrap();
 
-    (coordinates, folds)
+                (dir, value.parse().unwrap())
+            })
+            .collect(),
+    )
 }
 
 fn main() {
