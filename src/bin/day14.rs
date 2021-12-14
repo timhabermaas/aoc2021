@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::fs::read_to_string;
 
 fn parse_insertion(insertion: &str) -> ((u8, u8), u8) {
-    let (from, to) = insertion.split(" -> ").collect_tuple().unwrap();
+    let (from, to) = insertion.split_once(" -> ").unwrap();
 
     (
         from.chars().map(|c| c as u8).collect_tuple().unwrap(),
@@ -12,7 +12,7 @@ fn parse_insertion(insertion: &str) -> ((u8, u8), u8) {
 }
 
 fn parse_input(input: &str) -> (Vec<u8>, HashMap<(u8, u8), u8>) {
-    let (template, insertions) = input.split("\n\n").collect_tuple().unwrap();
+    let (template, insertions) = input.split_once("\n\n").unwrap();
     (
         template.chars().map(|c| c as u8).collect(),
         insertions.lines().map(|l| parse_insertion(l)).collect(),
