@@ -2,16 +2,16 @@ use itertools::Itertools;
 use std::collections::HashMap;
 use std::fs::read_to_string;
 
-fn parse_insertion(insertion: &str) -> (Vec<u8>, u8) {
+fn parse_insertion(insertion: &str) -> ((u8, u8), u8) {
     let (from, to) = insertion.split(" -> ").collect_tuple().unwrap();
 
     (
-        from.chars().map(|c| c as u8).collect(),
+        from.chars().map(|c| c as u8).collect_tuple().unwrap(),
         to.chars().nth(0).unwrap() as u8,
     )
 }
 
-fn parse_input(input: &str) -> (Vec<u8>, HashMap<Vec<u8>, u8>) {
+fn parse_input(input: &str) -> (Vec<u8>, HashMap<(u8, u8), u8>) {
     let (template, insertions) = input.split("\n\n").collect_tuple().unwrap();
     (
         template.chars().map(|c| c as u8).collect(),
@@ -30,12 +30,12 @@ fn main() {
 
     println!("Part 1: {}", part_1);
 
-    let part_2 = run_3(&template, &insertions, 40);
+    let part_2 = run_2(&template, &insertions, 40);
 
     println!("Part 2: {}", part_2);
 }
 
-fn run_3(template: &[u8], insertions: &HashMap<Vec<u8>, u8>, count: usize) -> usize {
+fn run_2(template: &[u8], insertions: &HashMap<(u8, u8), u8>, count: usize) -> usize {
     // Contains the count of all (overlapping) pairs. E.g. result['A']['B'] contains how often
     // `template` contains the substring "AB".
     let mut result: Vec<Vec<usize>> = vec![vec![0; 256]; 256];
@@ -59,16 +59,16 @@ fn run_3(template: &[u8], insertions: &HashMap<Vec<u8>, u8>, count: usize) -> us
         let mut new_result: Vec<Vec<usize>> = result.clone();
 
         for (from, to) in insertions {
-            if result[from[0] as usize][from[1] as usize] > 0 {
+            if result[from.0 as usize][from.1 as usize] > 0 {
                 // We want to replace AB with ACB, count how often AB occurs in the target string.
-                let occurences = result[from[0] as usize][from[1] as usize];
+                let occurences = result[from.0 as usize][from.1 as usize];
 
                 // Since we replace all AB, we remove all occurences from the next iteration.
-                new_result[from[0] as usize][from[1] as usize] -= occurences;
+                new_result[from.0 as usize][from.1 as usize] -= occurences;
                 // Add AC
-                new_result[from[0] as usize][*to as usize] += occurences;
+                new_result[from.0 as usize][*to as usize] += occurences;
                 // Add CB
-                new_result[*to as usize][from[1] as usize] += occurences;
+                new_result[*to as usize][from.1 as usize] += occurences;
                 // We produced #occurences new Cs.
                 counts[*to as usize] += occurences;
             }
@@ -105,14 +105,14 @@ fn print(x: &[Vec<usize>]) {
     }
 }
 
-fn run(mut template: Vec<u8>, insertions: &HashMap<Vec<u8>, u8>, count: usize) -> usize {
+fn run(mut template: Vec<u8>, insertions: &HashMap<(u8, u8), u8>, count: usize) -> usize {
     let mut result: Vec<u8> = Vec::with_capacity(template.len() * 2);
 
     for _ in 1..=count {
         result = Vec::with_capacity(template.len() * 2);
 
         for t in template.windows(2) {
-            let foo = insertions.get(t);
+            let foo = insertions.get(&(t[0], t[1]));
 
             result.push(t[0]);
             result.push(*foo.unwrap());
