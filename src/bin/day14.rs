@@ -39,16 +39,13 @@ fn run_3(template: &[u8], insertions: &HashMap<Vec<u8>, u8>, count: usize) -> us
     // Contains the count of all (overlapping) pairs. E.g. result['A']['B'] contains how often
     // `template` contains the substring "AB".
     let mut result: Vec<Vec<usize>> = vec![vec![0; 256]; 256];
-    // Counts for each character how often it is counted twice in `result`. Since `result` contains
-    // all overlapping pairs the string "ABC" would lead to a mapping of "AB" => 1, "BC" => 1 and
-    // we therefore would count "B" twice.
-    let mut duplicates: [usize; 256] = [0; 256];
 
-    // The inner characters all overlap, so count them as duplicates initially.
-    for i in 1..template.len() - 1 {
-        duplicates[template[i] as usize] += 1;
+    // Keeps track of how often each character is present in the target string.
+    let mut counts: [usize; 256] = [0; 256];
+
+    for t in template {
+        counts[*t as usize] += 1;
     }
-    print_single(&duplicates);
 
     for t in template.windows(2) {
         result[t[0] as usize][t[1] as usize] += 1;
@@ -72,28 +69,15 @@ fn run_3(template: &[u8], insertions: &HashMap<Vec<u8>, u8>, count: usize) -> us
                 new_result[from[0] as usize][*to as usize] += occurences;
                 // Add CB
                 new_result[*to as usize][from[1] as usize] += occurences;
-                // B now appears twice for each replacement, so add it as duplicate.
-                duplicates[*to as usize] += occurences;
+                // We produced #occurences new Cs.
+                counts[*to as usize] += occurences;
             }
         }
-
-        print_single(&duplicates);
 
         result = new_result;
     }
 
     print(&result);
-
-    let mut counts: [usize; 256] = [0; 256];
-
-    for i in 0..256 {
-        counts[i] += result[i].iter().sum::<usize>();
-        counts[i] += result.iter().fold(0, |sum, inner| sum + inner[i]);
-    }
-
-    for i in 0..256 {
-        counts[i] -= duplicates[i];
-    }
 
     println!("Counts:");
     print_single(&counts);
