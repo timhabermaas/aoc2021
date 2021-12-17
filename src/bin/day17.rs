@@ -50,8 +50,8 @@ impl Iterator for Path {
 }
 
 fn velocitys_on_target(start: Point, rect: Rect) -> impl Iterator<Item = V2> {
-    (1..=283)
-        .cartesian_product(-107..1000)
+    (1..=rect.to.0)
+        .cartesian_product(rect.from.1..rect.from.1.abs())
         .filter_map(move |(x, y)| {
             let v = (x, y);
             let mut path = Path {
