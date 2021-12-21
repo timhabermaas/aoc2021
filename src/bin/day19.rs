@@ -293,21 +293,22 @@ fn main() {
         }
     }
 
-    let mut all_beacons: HashSet<Beacon> = HashSet::new();
-    for (index, s) in scanners.iter().enumerate() {
-        let (scanner_pos, scanner_rotation) = known.get(&index).unwrap();
-        for b in &s.0 {
-            let foo = b.rotation(*scanner_rotation).add(scanner_pos);
-            all_beacons.insert(foo);
-        }
-    }
+    let all_beacons = scanners
+        .iter()
+        .enumerate()
+        .flat_map(|(index, Scanner(scanner))| {
+            let (scanner_pos, scanner_rotation) = known.get(&index).unwrap();
+            scanner
+                .iter()
+                .map(|b| b.rotation(*scanner_rotation).add(scanner_pos))
+        })
+        .collect::<HashSet<_>>();
 
     println!("Part 1: {:?}", all_beacons.len());
 
     let part_2 = (0..scanners.len())
-        .cartesian_product(0..scanners.len())
-        .filter(|(a, b)| a != b)
-        .map(|(a, b)| known[&a].0.distance(&known[&b].0))
+        .combinations(2)
+        .map(|v| known[&v[0]].0.distance(&known[&v[1]].0))
         .max();
 
     println!("Part 2: {:?}", part_2);
