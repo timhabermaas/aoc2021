@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, Copy)]
+use std::collections::HashMap;
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 struct Player {
     pos: i32,
     score: i32,
@@ -62,7 +64,7 @@ fn main() {
 
     let player1 = Player { pos: 7, score: 0 };
     let player2 = Player { pos: 1, score: 0 };
-    let (player1_universes, player2_universes) = solve_2(player1, player2);
+    let (player1_universes, player2_universes) = solve_2(player1, player2, &mut HashMap::new());
 
     println!(
         "Part 2: {:?}",
@@ -76,7 +78,15 @@ fn turn_1(die: &mut DeterministicDie, player: &mut Player) {
     player.score += player.pos;
 }
 
-fn solve_2(player1: Player, player2: Player) -> (u64, u64) {
+fn solve_2(
+    player1: Player,
+    player2: Player,
+    cache: &mut HashMap<(Player, Player), (u64, u64)>,
+) -> (u64, u64) {
+    if let Some(result) = cache.get(&(player1, player2)) {
+        return *result;
+    }
+
     if player1.score >= 21 {
         return (1, 0);
     }
@@ -86,14 +96,18 @@ fn solve_2(player1: Player, player2: Player) -> (u64, u64) {
 
     const ROLLS: [(i32, u64); 7] = [(4, 3), (3, 1), (6, 7), (8, 3), (9, 1), (7, 6), (5, 6)];
 
-    ROLLS.iter().fold((0, 0), |sum, (roll, count)| {
+    let result = ROLLS.iter().fold((0, 0), |sum, (roll, count)| {
         let mut player1 = player1;
 
         player1.pos = (player1.pos + roll - 1) % 10 + 1;
         player1.score += player1.pos;
 
-        let (u1, u2) = solve_2(player2, player1);
+        let (u1, u2) = solve_2(player2, player1, cache);
 
         (sum.0 + u2 * count, sum.1 + u1 * count)
-    })
+    });
+
+    cache.insert((player1, player2), result);
+
+    result
 }
