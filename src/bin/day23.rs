@@ -35,14 +35,6 @@ impl AmphipodType {
 fn part_1() -> usize {
     use AmphipodType::*;
 
-    let initial_board_ex: Board = Board {
-        rooms: [vec![A, B], vec![D, C], vec![C, B], vec![A, D]],
-        floor: [
-            None, None, None, None, None, None, None, None, None, None, None,
-        ],
-        room_height: 2,
-    };
-
     // #############
     // #...........#
     // ###A#C#B#D###
@@ -61,19 +53,6 @@ fn part_1() -> usize {
 
 fn part_2() -> usize {
     use AmphipodType::*;
-
-    let initial_board_ex: Board = Board {
-        rooms: [
-            vec![A, D, D, B],
-            vec![D, B, C, C],
-            vec![C, A, B, B],
-            vec![A, C, A, D],
-        ],
-        floor: [
-            None, None, None, None, None, None, None, None, None, None, None,
-        ],
-        room_height: 4,
-    };
 
     // #############
     // #...........#
