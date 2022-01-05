@@ -36,10 +36,7 @@ fn part_1() -> usize {
     use AmphipodType::*;
 
     let initial_board_ex: Board = Board {
-        room_a: vec![A, B],
-        room_b: vec![D, C],
-        room_c: vec![C, B],
-        room_d: vec![A, D],
+        rooms: [vec![A, B], vec![D, C], vec![C, B], vec![A, D]],
         floor: [
             None, None, None, None, None, None, None, None, None, None, None,
         ],
@@ -52,10 +49,7 @@ fn part_1() -> usize {
     //   #B#A#D#C#
     //   #########
     let initial_board: Board = Board {
-        room_a: vec![B, A],
-        room_b: vec![A, C],
-        room_c: vec![D, B],
-        room_d: vec![C, D],
+        rooms: [vec![B, A], vec![A, C], vec![D, B], vec![C, D]],
         floor: [
             None, None, None, None, None, None, None, None, None, None, None,
         ],
@@ -69,10 +63,12 @@ fn part_2() -> usize {
     use AmphipodType::*;
 
     let initial_board_ex: Board = Board {
-        room_a: vec![A, D, D, B],
-        room_b: vec![D, B, C, C],
-        room_c: vec![C, A, B, B],
-        room_d: vec![A, C, A, D],
+        rooms: [
+            vec![A, D, D, B],
+            vec![D, B, C, C],
+            vec![C, A, B, B],
+            vec![A, C, A, D],
+        ],
         floor: [
             None, None, None, None, None, None, None, None, None, None, None,
         ],
@@ -87,10 +83,12 @@ fn part_2() -> usize {
     //   #B#A#D#C#
     //   #########
     let initial_board: Board = Board {
-        room_a: vec![B, D, D, A],
-        room_b: vec![A, B, C, C],
-        room_c: vec![D, A, B, B],
-        room_d: vec![C, C, A, D],
+        rooms: [
+            vec![B, D, D, A],
+            vec![A, B, C, C],
+            vec![D, A, B, B],
+            vec![C, C, A, D],
+        ],
         floor: [
             None, None, None, None, None, None, None, None, None, None, None,
         ],
@@ -146,7 +144,7 @@ fn find_shortest_path(start: Board) -> Option<usize> {
         for (new_board, new_cost) in state
             .move_to_hall()
             .iter()
-            .chain(state.move_in_room().iter())
+            .chain(state.move_into_room().iter())
         {
             let new_node = Node {
                 state: new_board.clone(),
@@ -165,10 +163,7 @@ fn find_shortest_path(start: Board) -> Option<usize> {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Board {
-    room_a: Vec<AmphipodType>,
-    room_b: Vec<AmphipodType>,
-    room_c: Vec<AmphipodType>,
-    room_d: Vec<AmphipodType>,
+    rooms: [Vec<AmphipodType>; 4],
     floor: [Option<AmphipodType>; 11],
     room_height: usize,
 }
@@ -204,19 +199,19 @@ impl Board {
 
     fn room_mut(&mut self, kind: AmphipodType) -> &mut Vec<AmphipodType> {
         match kind {
-            AmphipodType::A => &mut self.room_a,
-            AmphipodType::B => &mut self.room_b,
-            AmphipodType::C => &mut self.room_c,
-            AmphipodType::D => &mut self.room_d,
+            AmphipodType::A => &mut self.rooms[0],
+            AmphipodType::B => &mut self.rooms[1],
+            AmphipodType::C => &mut self.rooms[2],
+            AmphipodType::D => &mut self.rooms[3],
         }
     }
 
     fn room(&self, kind: AmphipodType) -> &Vec<AmphipodType> {
         match kind {
-            AmphipodType::A => &self.room_a,
-            AmphipodType::B => &self.room_b,
-            AmphipodType::C => &self.room_c,
-            AmphipodType::D => &self.room_d,
+            AmphipodType::A => &self.rooms[0],
+            AmphipodType::B => &self.rooms[1],
+            AmphipodType::C => &self.rooms[2],
+            AmphipodType::D => &self.rooms[3],
         }
     }
 
@@ -268,7 +263,7 @@ impl Board {
         result
     }
 
-    fn move_in_room(&self) -> Vec<(Board, usize)> {
+    fn move_into_room(&self) -> Vec<(Board, usize)> {
         let mut result = vec![];
 
         for (i, amp) in self.floor.iter().enumerate() {
@@ -315,12 +310,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_move_in_room_empty_room() {
+    fn test_move_into_room_empty_room() {
         let board: Board = Board {
-            room_a: vec![],
-            room_b: vec![D, B, C, C],
-            room_c: vec![C, A, B, B],
-            room_d: vec![A, C, A, D],
+            rooms: [vec![], vec![D, B, C, C], vec![C, A, B, B], vec![A, C, A, D]],
             floor: [
                 Some(A),
                 None,
@@ -338,26 +330,30 @@ mod tests {
         };
 
         let board_expected: Board = Board {
-            room_a: vec![A],
-            room_b: vec![D, B, C, C],
-            room_c: vec![C, A, B, B],
-            room_d: vec![A, C, A, D],
+            rooms: [
+                vec![A],
+                vec![D, B, C, C],
+                vec![C, A, B, B],
+                vec![A, C, A, D],
+            ],
             floor: [
                 None, None, None, None, None, None, None, None, None, None, None,
             ],
             room_height: 4,
         };
 
-        assert_eq!(board.move_in_room(), vec![(board_expected, 6)]);
+        assert_eq!(board.move_into_room(), vec![(board_expected, 6)]);
     }
 
     #[test]
-    fn test_move_in_room_full_of_as() {
+    fn test_move_into_room_full_of_as() {
         let board: Board = Board {
-            room_a: vec![A, A],
-            room_b: vec![D, B, C, C],
-            room_c: vec![C, A, B, B],
-            room_d: vec![A, C, A, D],
+            rooms: [
+                vec![A, A],
+                vec![D, B, C, C],
+                vec![C, A, B, B],
+                vec![A, C, A, D],
+            ],
             floor: [
                 Some(A),
                 None,
@@ -375,26 +371,25 @@ mod tests {
         };
 
         let board_expected: Board = Board {
-            room_a: vec![A, A, A],
-            room_b: vec![D, B, C, C],
-            room_c: vec![C, A, B, B],
-            room_d: vec![A, C, A, D],
+            rooms: [
+                vec![A, A, A],
+                vec![D, B, C, C],
+                vec![C, A, B, B],
+                vec![A, C, A, D],
+            ],
             floor: [
                 None, None, None, None, None, None, None, None, None, None, None,
             ],
             room_height: 4,
         };
 
-        assert_eq!(board.move_in_room(), vec![(board_expected, 4)]);
+        assert_eq!(board.move_into_room(), vec![(board_expected, 4)]);
     }
 
     #[test]
-    fn test_move_in_room_blocked() {
+    fn test_move_into_room_blocked() {
         let board: Board = Board {
-            room_a: vec![],
-            room_b: vec![D, B, C, C],
-            room_c: vec![C],
-            room_d: vec![A, C, A, D],
+            rooms: [vec![], vec![D, B, C, C], vec![C], vec![A, C, A, D]],
             floor: [
                 None,
                 None,
@@ -412,10 +407,7 @@ mod tests {
         };
 
         let board_expected: Board = Board {
-            room_a: vec![],
-            room_b: vec![D, B, C, C],
-            room_c: vec![C, C],
-            room_d: vec![A, C, A, D],
+            rooms: [vec![], vec![D, B, C, C], vec![C, C], vec![A, C, A, D]],
             floor: [
                 None,
                 None,
@@ -432,16 +424,13 @@ mod tests {
             room_height: 4,
         };
 
-        assert_eq!(board.move_in_room(), vec![(board_expected, 600)]);
+        assert_eq!(board.move_into_room(), vec![(board_expected, 600)]);
     }
 
     #[test]
-    fn test_move_in_room_multiple() {
+    fn test_move_into_room_multiple() {
         let board: Board = Board {
-            room_a: vec![],
-            room_b: vec![D, B, C, C],
-            room_c: vec![],
-            room_d: vec![A, C, A, D],
+            rooms: [vec![], vec![D, B, C, C], vec![], vec![A, C, A, D]],
             floor: [
                 Some(A),
                 None,
@@ -459,10 +448,7 @@ mod tests {
         };
 
         let board_expected_1: Board = Board {
-            room_a: vec![A],
-            room_b: vec![D, B, C, C],
-            room_c: vec![],
-            room_d: vec![A, C, A, D],
+            rooms: [vec![A], vec![D, B, C, C], vec![], vec![A, C, A, D]],
             floor: [
                 None,
                 None,
@@ -480,10 +466,7 @@ mod tests {
         };
 
         let board_expected_2: Board = Board {
-            room_a: vec![],
-            room_b: vec![D, B, C, C],
-            room_c: vec![C],
-            room_d: vec![A, C, A, D],
+            rooms: [vec![], vec![D, B, C, C], vec![C], vec![A, C, A, D]],
             floor: [
                 Some(A),
                 None,
@@ -501,7 +484,7 @@ mod tests {
         };
 
         assert_eq!(
-            board.move_in_room(),
+            board.move_into_room(),
             vec![(board_expected_1, 6), (board_expected_2, 800)]
         );
     }
@@ -516,10 +499,7 @@ mod tests {
         //   #A#D#A#.#
         //   #########
         let board: Board = Board {
-            room_a: vec![A, A],
-            room_b: vec![D, B, C],
-            room_c: vec![A, C, A, C],
-            room_d: vec![],
+            rooms: [vec![A, A], vec![D, B, C], vec![A, C, A, C], vec![]],
             floor: [
                 Some(A),
                 None,
@@ -537,10 +517,7 @@ mod tests {
         };
 
         let board_expected_1: Board = Board {
-            room_a: vec![A, A],
-            room_b: vec![D, B],
-            room_c: vec![A, C, A, C],
-            room_d: vec![],
+            rooms: [vec![A, A], vec![D, B], vec![A, C, A, C], vec![]],
             floor: [
                 Some(A),
                 None,
@@ -558,10 +535,7 @@ mod tests {
         };
 
         let board_expected_2: Board = Board {
-            room_a: vec![A, A],
-            room_b: vec![D, B],
-            room_c: vec![A, C, A, C],
-            room_d: vec![],
+            rooms: [vec![A, A], vec![D, B], vec![A, C, A, C], vec![]],
             floor: [
                 Some(A),
                 Some(C),
@@ -579,10 +553,7 @@ mod tests {
         };
 
         let board_expected_3: Board = Board {
-            room_a: vec![A, A],
-            room_b: vec![D, B, C],
-            room_c: vec![A, C, A],
-            room_d: vec![],
+            rooms: [vec![A, A], vec![D, B, C], vec![A, C, A], vec![]],
             floor: [
                 Some(A),
                 None,
@@ -599,10 +570,7 @@ mod tests {
             room_height: 4,
         };
         let board_expected_4: Board = Board {
-            room_a: vec![A, A],
-            room_b: vec![D, B, C],
-            room_c: vec![A, C, A],
-            room_d: vec![],
+            rooms: [vec![A, A], vec![D, B, C], vec![A, C, A], vec![]],
             floor: [
                 Some(A),
                 None,
