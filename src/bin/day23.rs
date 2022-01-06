@@ -1,11 +1,12 @@
 use std::collections::{BinaryHeap, HashMap};
 
+#[repr(u8)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 enum AmphipodType {
-    A,
-    B,
-    C,
-    D,
+    A = 0,
+    B = 1,
+    C = 2,
+    D = 3,
 }
 
 impl AmphipodType {
@@ -165,7 +166,7 @@ impl Board {
     }
 
     fn is_room_correct(&self, kind: AmphipodType) -> bool {
-        self.room(kind).iter().all(|a| *a == kind)
+        self.rooms[kind as usize].iter().all(|a| *a == kind)
     }
 
     fn is_solved(&self) -> bool {
@@ -177,21 +178,11 @@ impl Board {
     }
 
     fn room_mut(&mut self, kind: AmphipodType) -> &mut Vec<AmphipodType> {
-        match kind {
-            AmphipodType::A => &mut self.rooms[0],
-            AmphipodType::B => &mut self.rooms[1],
-            AmphipodType::C => &mut self.rooms[2],
-            AmphipodType::D => &mut self.rooms[3],
-        }
+        &mut self.rooms[kind as usize]
     }
 
     fn room(&self, kind: AmphipodType) -> &Vec<AmphipodType> {
-        match kind {
-            AmphipodType::A => &self.rooms[0],
-            AmphipodType::B => &self.rooms[1],
-            AmphipodType::C => &self.rooms[2],
-            AmphipodType::D => &self.rooms[3],
-        }
+        &self.rooms[kind as usize]
     }
 
     fn move_to_hall(&self) -> Vec<(Board, usize)> {
